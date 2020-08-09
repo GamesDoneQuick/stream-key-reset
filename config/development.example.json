@@ -1,0 +1,8 @@
+{
+  "TWITCH_CLIENT_ID": "yourkeyfromtwitch",
+  "TWITCH_CLIENT_SECRET": "yoursecretfromtwitch",
+  // This value should not be changed unless you change the Client redirect string on Twitch
+  "OAUTH_HTTP_LISTEN_PORT": 32556,
+  // This will be populated automatically by the application as you initialize users
+  "KNOWN_USERS": {}
+}

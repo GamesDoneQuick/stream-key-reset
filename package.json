@@ -1,0 +1,35 @@
+{
+  "name": "stream-key-reset",
+  "private": true,
+  "version": "0.1.0",
+  "author": "Jon Egeland <jonegeland@gmail.com>",
+  "description": "Reset twitch stream keys programmatically",
+  "license": "MIT",
+  "source": "src/index.tsx",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.module.js",
+  "unpkg": "dist/index.umd.js",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "format": "prettier --write '**'",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf dist && tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.27",
+    "microbundle": "^0.12.3",
+    "prettier": "^2.0.4",
+    "typescript": "3.9.3"
+  },
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "commander": "^6.0.0",
+    "got": "^11.5.2",
+    "open": "^7.1.0",
+    "twitch": "^4.1.3"
+  }
+}

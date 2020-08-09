@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+const path = require('path');
+const chalk = require('chalk');
+const {Command} = require('commander');
+const {authorize, fetchStreamKey, reset, revoke} = require("./dist/index.js");
+
+const environment = process.env.NODE_ENV || 'production';
+const configPath = path.resolve(`./config/${environment}.json`);
+console.log(chalk.blue(`Loading configuration from ${configPath}`));
+const config = require(configPath);
+
+const program = new Command();
+program.version('0.1.0')
+  .name("stream-key-reset")
+  .usage("command [options]");
+
+program.command('authorize <username>')
+  .alias("auth")
+  .description("Add a known user for this application to reset stream keys.")
+  .action((username) => {
+    authorize(config, configPath, username)
+  });
+
+program.command("remove <username>")
+  .alias("revoke")
+  .description("Remove a known user from this application. This will fully revoke the obtained OAuth token for this user.")
+  .action((username) => {
+    revoke(config, configPath, username)
+  });
+
+program.command("reset <username>")
+  .description("Delete the stream key for the given user so that Twitch will generate a new one")
+  .action((username) => {
+    reset(config, configPath, username)
+  });
+
+program.command("fetch <username>")
+  .description("Gets the current stream key for the given user")
+  .action((username) => {
+    fetchStreamKey(config, configPath, username)
+  });
+
+
+program.parse(process.argv);
