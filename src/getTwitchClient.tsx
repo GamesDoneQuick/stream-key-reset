@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import TwitchClient, { RefreshableAuthProvider, StaticAuthProvider } from "twitch";
+import TwitchClient, { InvalidTokenError } from "twitch";
 
 import writeConfig from "./writeConfig";
 
@@ -71,7 +71,13 @@ export default async function getTwitchClient(
       );
     },
   });
-  await client.refreshAccessToken();
+  try {
+    await client.getAccessToken();
+  } catch (e) {
+    if (e instanceof InvalidTokenError) {
+      await client.refreshAccessToken();
+    }
+  }
 
   clients[username] = client;
   return client;
