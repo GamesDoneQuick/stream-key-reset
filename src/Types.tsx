@@ -3,7 +3,7 @@ export type UserInfo = {
   userId: string;
   accessToken: string;
   refreshToken: string;
-  expiryDate: Date | null;
+  expiryDate: Date | string | null;
 };
 
 export type Config = {

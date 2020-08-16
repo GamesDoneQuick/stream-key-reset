@@ -33,7 +33,8 @@ export default function getTwitchClient(config: Config, configPath: string, user
   }
   const { userId } = userInfo;
 
-  const { accessToken, refreshToken, expiryDate } = userInfo;
+  const { accessToken, refreshToken, expiryDate: rawExpiryDate } = userInfo;
+  const expiryDate = new Date(rawExpiryDate as string);
   if (accessToken == null) {
     console.error(
       chalk.bold.red(
@@ -54,10 +55,10 @@ export default function getTwitchClient(config: Config, configPath: string, user
   const clientId = config.TWITCH_CLIENT_ID;
   const clientSecret = config.TWITCH_CLIENT_SECRET;
 
-  const authProvider = new RefreshableAuthProvider(new StaticAuthProvider(clientId, accessToken), {
+  const client = TwitchClient.withCredentials(clientId, accessToken, undefined, {
     clientSecret,
     refreshToken,
-    expiry: expiryDate || new Date(),
+    expiry: expiryDate,
     onRefresh: ({ accessToken, refreshToken, expiryDate }) => {
       updateUserConfig(
         { username, userId, accessToken, refreshToken, expiryDate },
@@ -66,7 +67,6 @@ export default function getTwitchClient(config: Config, configPath: string, user
       );
     },
   });
-  const client = new TwitchClient({ authProvider });
 
   clients[username] = client;
   return client;
