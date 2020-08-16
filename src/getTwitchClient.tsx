@@ -23,7 +23,11 @@ function updateUserConfig(userInfo: UserInfo, config: Config, configPath: string
  * Return a Twitch API Client with the given authorization credentials. The client
  * will automatically update access tokens if the user's credentials have expired.
  */
-export default function getTwitchClient(config: Config, configPath: string, username: string) {
+export default async function getTwitchClient(
+  config: Config,
+  configPath: string,
+  username: string,
+) {
   if (clients[username] != null) return clients[username];
 
   const userInfo = config.KNOWN_USERS[username];
@@ -67,6 +71,7 @@ export default function getTwitchClient(config: Config, configPath: string, user
       );
     },
   });
+  await client.refreshAccessToken();
 
   clients[username] = client;
   return client;

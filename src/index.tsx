@@ -14,9 +14,9 @@ function getUserInfo(config: Config, username: string) {
  * Ensure that the program has usable credentials to create an API client.
  * Returns `true` if so, `false` if new credentials are needed.
  */
-export function ensureClient(config: Config, configPath: string, username: string) {
+export async function ensureClient(config: Config, configPath: string, username: string) {
   console.log("Ensuring API credentials exist");
-  const client = getTwitchClient(config, configPath, username);
+  const client = await getTwitchClient(config, configPath, username);
   if (client === false) {
     console.error(chalk.red("Could not create a Twitch API client"));
     process.exit(-1);
@@ -40,7 +40,7 @@ export async function authorize(config: Config, configPath: string, username: st
       [username]: userConfig,
     },
   };
-  const client = ensureClient(tempConfig, configPath, username);
+  const client = await ensureClient(tempConfig, configPath, username);
   const { displayName, id } = await client.kraken.users.getMe();
   if (displayName !== username) {
     console.log(
@@ -91,7 +91,7 @@ export async function revoke(config: Config, configPath: string, username: strin
 }
 
 export async function reset(config: Config, configPath: string, username: string) {
-  const client = ensureClient(config, configPath, username);
+  const client = await ensureClient(config, configPath, username);
   const { userId } = getUserInfo(config, username);
 
   const channel = await client.kraken.channels.resetChannelStreamKey(userId).catch((err) => {
@@ -106,7 +106,7 @@ export async function reset(config: Config, configPath: string, username: string
 }
 
 export async function fetchStreamKey(config: Config, configPath: string, username: string) {
-  const client = ensureClient(config, configPath, username);
+  const client = await ensureClient(config, configPath, username);
 
   const channel = await client.kraken.channels.getMyChannel().catch((err) => {
     console.log(chalk.red(`Failed to fetch stream key for '${username}'`));
