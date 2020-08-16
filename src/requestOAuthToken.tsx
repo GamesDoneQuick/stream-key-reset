@@ -35,7 +35,11 @@ const makeAuthUrl = (
 
 async function getTokenFromAuthCode(authUrl: string) {
   const response: any = await got.post(authUrl, { responseType: "json" }).json();
-  return { accessToken: response.access_token, refreshToken: response.refresh_token };
+  return {
+    accessToken: response.access_token,
+    refreshToken: response.refresh_token,
+    expiryDate: new Date(Date.now() + response.expires_in),
+  };
 }
 
 export default async function requestOAuthToken(
@@ -43,31 +47,35 @@ export default async function requestOAuthToken(
   clientSecret: string,
   listenPort: number,
 ) {
-  return new Promise<{ accessToken: string; refreshToken: string }>((resolve) => {
-    const server = http
-      .createServer(async (req, res) => {
-        const { query } = url.parse(req.url!, true);
-        // unsafe because url.parse thinks this could be an array
-        const code = query.code as string;
+  return new Promise<{ accessToken: string; refreshToken: string; expiryDate: Date | null }>(
+    (resolve) => {
+      const server = http
+        .createServer(async (req, res) => {
+          const { query } = url.parse(req.url!, true);
+          // unsafe because url.parse thinks this could be an array
+          const code = query.code as string;
 
-        resolve(await getTokenFromAuthCode(makeAuthUrl(code, listenPort, clientId, clientSecret)));
+          resolve(
+            await getTokenFromAuthCode(makeAuthUrl(code, listenPort, clientId, clientSecret)),
+          );
 
-        res.writeHead(200);
-        res.write(
-          "You've successfully authenticated this user. You can close this window now and return to the CLI",
-        );
-        res.end();
-        req.connection.end();
-        req.connection.destroy();
-        server.close();
-      })
-      .listen(listenPort);
+          res.writeHead(200);
+          res.write(
+            "You've successfully authenticated this user. You can close this window now and return to the CLI",
+          );
+          res.end();
+          req.connection.end();
+          req.connection.destroy();
+          server.close();
+        })
+        .listen(listenPort);
 
-    console.log(
-      chalk.green(
-        "Opening Twitch Authorization Page. Make sure you are logged in with the requested account before verifying",
-      ),
-    );
-    open(makeCodeUrl(clientId, listenPort));
-  });
+      console.log(
+        chalk.green(
+          "Opening Twitch Authorization Page. Make sure you are logged in with the requested account before verifying",
+        ),
+      );
+      open(makeCodeUrl(clientId, listenPort));
+    },
+  );
 }

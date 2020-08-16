@@ -26,14 +26,14 @@ export function ensureClient(config: Config, configPath: string, username: strin
 }
 
 export async function authorize(config: Config, configPath: string, username: string) {
-  const { accessToken, refreshToken } = await requestOAuthToken(
+  const { accessToken, refreshToken, expiryDate } = await requestOAuthToken(
     config.TWITCH_CLIENT_ID,
     config.TWITCH_CLIENT_SECRET,
     config.OAUTH_HTTP_LISTEN_PORT,
   );
 
   console.log(chalk.blue("Verifying that the correct user was authorized"));
-  const userConfig: UserInfo = { username, userId: "temp", accessToken, refreshToken };
+  const userConfig: UserInfo = { username, userId: "temp", accessToken, refreshToken, expiryDate };
   const tempConfig = {
     ...config,
     KNOWN_USERS: {
@@ -107,7 +107,6 @@ export async function reset(config: Config, configPath: string, username: string
 
 export async function fetchStreamKey(config: Config, configPath: string, username: string) {
   const client = ensureClient(config, configPath, username);
-  const { userId } = getUserInfo(config, username);
 
   const channel = await client.kraken.channels.getMyChannel().catch((err) => {
     console.log(chalk.red(`Failed to fetch stream key for '${username}'`));

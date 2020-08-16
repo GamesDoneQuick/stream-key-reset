@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import TwitchClient, { AccessToken, RefreshableAuthProvider, StaticAuthProvider } from "twitch";
+import TwitchClient, { RefreshableAuthProvider, StaticAuthProvider } from "twitch";
 
 import writeConfig from "./writeConfig";
 
@@ -10,7 +10,11 @@ const clients: {
 } = {};
 
 function updateUserConfig(userInfo: UserInfo, config: Config, configPath: string) {
-  console.log(chalk.bold.yellow("User access tokens refreshed to avoid expiry."));
+  console.log(
+    chalk.bold.yellow(
+      `User access tokens refreshed to avoid expiry. Next expires at ${userInfo.expiryDate}`,
+    ),
+  );
   config.KNOWN_USERS[userInfo.username] = userInfo;
   writeConfig(configPath, config);
 }
@@ -29,7 +33,7 @@ export default function getTwitchClient(config: Config, configPath: string, user
   }
   const { userId } = userInfo;
 
-  const { accessToken, refreshToken } = userInfo;
+  const { accessToken, refreshToken, expiryDate } = userInfo;
   if (accessToken == null) {
     console.error(
       chalk.bold.red(
@@ -53,8 +57,13 @@ export default function getTwitchClient(config: Config, configPath: string, user
   const authProvider = new RefreshableAuthProvider(new StaticAuthProvider(clientId, accessToken), {
     clientSecret,
     refreshToken,
-    onRefresh: ({ accessToken, refreshToken }) => {
-      updateUserConfig({ username, userId, accessToken, refreshToken }, config, configPath);
+    expiry: expiryDate || new Date(),
+    onRefresh: ({ accessToken, refreshToken, expiryDate }) => {
+      updateUserConfig(
+        { username, userId, accessToken, refreshToken, expiryDate },
+        config,
+        configPath,
+      );
     },
   });
   const client = new TwitchClient({ authProvider });
